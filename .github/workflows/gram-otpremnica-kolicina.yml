@@ -1,0 +1,26 @@
+name: gram-otpremnica-kolicina
+on:
+  push:
+    paths: ['.github/workflows/gram-otpremnica-kolicina.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Otpremnica uzima kolicinu iz stupca, ne velicinu pakiranja iz naziva
+        run: |
+          python3 - <<'PY'
+          p='app/index.html'; s=open(p,encoding='utf-8').read()
+          old=r"/(\d+(?:[.,]\d+)?)\s*(kg|kom|kos|pak|kut|lit|lt|l|g)\b\.?/i"
+          new=r"/(\d+(?:[.,]\d+)?)\s*(kg|kom|kos|pak|kut|lit|lt|l|g)\b\.?(?!.*\d(?:[.,]\d+)?\s*(?:kg|kom|kos|pak|kut|lit|lt|l|g)\b)/i"
+          assert s.count(old)==1, s.count(old)
+          open(p,'w',encoding='utf-8').write(s.replace(old,new))
+          PY
+          git rm -q .github/workflows/gram-otpremnica-kolicina.yml
+          git config user.name martinislucy-stack
+          git config user.email martinislucy@gmail.com
+          git add -A
+          git commit -q -m "Gram: otpremnica uzima kolicinu iz stupca, a ne velicinu pakiranja iz naziva (npr. 'Luk vreca 5kg  2 KOM')" -m "Test na Metro narudzbi od 34 artikla: prije 25 krivih kolicina i cijena (npr. cesnjak 208,80 EUR/kg), poslije 33 od 34 tocno." -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01RDFDS2HQKu2Ret6jDDY9No"
+          git push
