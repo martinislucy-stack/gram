@@ -1,0 +1,27 @@
+name: gram-v1-12-7-offline
+on:
+  push:
+    paths: ['.github/workflows/gram-v1-12-7-offline.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Registriraj service worker uvijek (i u Safariju)
+        run: |
+          python3 - <<'PY'
+          import re
+          p='app/index.html'; s=open(p,encoding='utf-8').read()
+          m=re.findall(r"if\(NP\['ok'\]\)try\{navigator\[(_0x[0-9a-f]+\(0x[0-9a-f]+\))\]\['register'\]\('sw\.js'\)",s)
+          assert len(m)==1, m
+          s=s.replace("if(NP['ok'])try{navigator[","if(navigator["+m[0]+"])try{navigator[",1)
+          open(p,'w',encoding='utf-8').write(s)
+          PY
+          git rm -q .github/workflows/gram-v1-12-7-offline.yml
+          git config user.name martinislucy-stack
+          git config user.email martinislucy@gmail.com
+          git add -A
+          git commit -q -m "Gram v1.12.7: service worker se registrira i u Safariju, Gram se otvara bez interneta" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01RDFDS2HQKu2Ret6jDDY9No"
+          git push
